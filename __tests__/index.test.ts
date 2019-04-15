@@ -9,6 +9,8 @@ import {
     isNonPrimitive,
     is,
     isLike,
+    isImplementationOf,
+    isSliceOf,
 } from "../src/index";
 
 const SATISFY = true;
@@ -115,11 +117,11 @@ it("isNonPrimitive", () => {
 });
 
 class Animal { constructor(public readonly name: string) {} }
-class Lion extends Animal {}
+class Lion extends Animal { constructor(public readonly name: string, public readonly age: number) { super(name); } }
 class Warthog extends Animal {}
 const someone = new Animal("Someone");
-const simba = new Lion("Simba");
-const nala = new Lion("Nala");
+const simba = new Lion("Simba", 5);
+const nala = new Lion("Nala", 4);
 const pumbaa = new Warthog("Pumbaa");
 
 it("is", () => {
@@ -224,5 +226,29 @@ it("isLike for array of dictionaries", () => {
     check(isLike([ { a: "aaa" } ]), {
         shouldSatisfy: [ [], [ { a: "a" } ], [ { a: "a" }, { a: "aa" } ] ],
         shouldNotSatisfy: BASICS.concat([ {}, [ {} ], [ { b: "bbb" } ], [ { a: 5 } ], [ { a: undefined } ] ]),
+    });
+});
+
+it("isImplementationOf", () => {
+    check(isImplementationOf({ name: isString }), {
+        shouldSatisfy: [ Animal, Lion, simba, nala, _ => 5 ],
+        shouldNotSatisfy: [ undefined, null, true, false, 0, 1, "", "foo", Symbol(), [], {}, { Name: "foo" } ],
+    });
+
+    check(isImplementationOf({ name: isString, age: isNumber }), {
+        shouldSatisfy: [ simba, nala, { name: 'Scar', age: 12 } ],
+        shouldNotSatisfy: [ undefined, null, true, false, 0, 1, "", "foo", Symbol(), [], {}, { Name: "foo" }, pumbaa, someone ],
+    });
+});
+
+it("isSliceOf", () => {
+    check(isSliceOf<Animal>({ name: isString }), {
+        shouldSatisfy: [ Animal, Lion, simba, nala, _ => 5 ],
+        shouldNotSatisfy: [ undefined, null, true, false, 0, 1, "", "foo", Symbol(), [], {}, { Name: "foo" } ],
+    });
+
+    check(isSliceOf<Lion>({ name: isString, age: isNumber }), {
+        shouldSatisfy: [ simba, nala, { name: 'Scar', age: 12 } ],
+        shouldNotSatisfy: [ undefined, null, true, false, 0, 1, "", "foo", Symbol(), [], {}, { Name: "foo" }, pumbaa, someone ],
     });
 });

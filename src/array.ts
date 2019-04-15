@@ -1,5 +1,5 @@
-import { primitive, Classy } from "./types";
-import { isBoolean, isNumber, isString, isSymbol, isNull, isUndefined, isPrimitive, isNonPrimitive, is, isLike } from "./is";
+import { primitive, Classy, InterfaceDescriptor, InterfaceFromDescriptor, SliceGuardDescriptor } from "./types";
+import { isBoolean, isNumber, isString, isSymbol, isNull, isUndefined, isPrimitive, isNonPrimitive, is, isLike, isImplementationOf, isSliceOf } from "./is";
 
 export function isArrayOfBooleans(x: any): x is boolean[] {
     return isArrayOfLike(true)(x);
@@ -39,4 +39,16 @@ export function isArrayOf<T>(type: Classy<T>): (xs: any) => xs is T[] {
 
 export function isArrayOfLike<T>(reference: T): (x: any) => x is T[] {
     return (x: any): x is T[] => is(Array)(x) && x.every(isLike(reference));
+}
+
+export function isArrayOfImplementations<D extends InterfaceDescriptor>(
+    map: D
+): (x: any) => x is InterfaceFromDescriptor<D>[] {
+    return (x: any): x is InterfaceFromDescriptor<D>[] => is(Array)(x) && x.every(isImplementationOf(map));
+}
+
+export function isArrayOfSlices<T extends object = object, K extends keyof T = keyof T>(
+    map: SliceGuardDescriptor<T, K>
+): (x: any) => x is Pick<T, K>[] {
+    return (x: any): x is T[] => is(Array)(x) && x.every(isSliceOf(map));
 }

@@ -1,5 +1,5 @@
-import { primitive, Classy } from "./types";
-import { isBoolean, isNumber, isString, isSymbol, isNull, isUndefined, isPrimitive, isNonPrimitive, is, isLike } from "./is";
+import { primitive, Classy, SliceGuardDescriptor, InterfaceDescriptor, InterfaceFromDescriptor } from "./types";
+import { isBoolean, isNumber, isString, isSymbol, isNull, isUndefined, isPrimitive, isNonPrimitive, is, isLike, isImplementationOf, isSliceOf } from "./is";
 
 export function onlyBooleans(xs: any[]): boolean[] {
     return xs.filter(isBoolean);
@@ -39,4 +39,16 @@ export function only<T>(type: Classy<T>): (xs: any[]) => T[] {
 
 export function onlyLike<T>(reference: T): (xs: any[]) => T[] {
     return (xs: any[]): T[] => xs.filter(isLike(reference));
+}
+
+export function onlyImplementationsOf<D extends InterfaceDescriptor>(
+    map: D
+): (xs: any[]) => InterfaceFromDescriptor<D>[] {
+    return (xs: any) => xs.filter(isImplementationOf(map));
+}
+
+export function onlySlicesOf<T extends object = object, K extends keyof T = keyof T>(
+    map: SliceGuardDescriptor<T, K>
+): (xs: any[]) => Pick<T, K>[] {
+    return (xs: any) => xs.filter(isSliceOf(map));
 }

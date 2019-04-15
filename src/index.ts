@@ -15,6 +15,8 @@ export {
     isNonPrimitive,
     is,
     isLike,
+    isImplementationOf,
+    isSliceOf,
 } from "./is";
 
 export {
@@ -28,6 +30,8 @@ export {
     isArrayOfObjects,
     isArrayOf,
     isArrayOfLike,
+    isArrayOfImplementations,
+    isArrayOfSlices,
 } from "./array";
 
 export {
@@ -41,4 +45,6 @@ export {
     onlyObjects,
     only,
     onlyLike,
+    onlyImplementationsOf,
+    onlySlicesOf,
 } from "./only";

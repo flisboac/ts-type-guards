@@ -1,4 +1,4 @@
-import { primitive, Classy, TypeGuard } from "./types";
+import { primitive, Classy, TypeGuard, InterfaceDescriptor, InterfaceFromDescriptor, SliceGuard, SliceGuardDescriptor, InterfaceGuardFromDescriptor } from "./types";
 
 const TYPE_GUARDS_PRIMITIVE = [isBoolean, isNumber, isString, isSymbol, isNull, isUndefined];
 
@@ -130,3 +130,43 @@ export function isLike<T>(reference: T): TypeGuard<T> {
     }
     throw new TypeError(isLike.name + ` cannot use this object as reference because it has no constructor: ` + JSON.stringify(reference));
 }
+
+export function isImplementationOf<
+    D extends InterfaceDescriptor,
+>(
+    map: D
+): InterfaceGuardFromDescriptor<D> {
+    const fields = (Object.keys(map) as (keyof D)[]).map(key => ({ key, guard: map[key] }));
+    return (value: any): value is InterfaceFromDescriptor<D> => 
+        isNonPrimitive(value)
+        && fields.every(field => field.guard((value as any)[field.key]));
+}
+
+export function isSliceOf<
+    T extends object,
+    K extends keyof T = keyof T,
+>(
+    map: SliceGuardDescriptor<T, K>,
+): SliceGuard<T, K> {
+    const fields = (Object.keys(map) as K[]).map(key => ({ key, guard: map[key] }));
+    return (value: any): value is Pick<T, K> => 
+        isNonPrimitive(value)
+        && fields.every(field => field.guard((value as any)[field.key]));
+}
+
+
+// type InterfaceFromDescriptor<D, T extends object = never> = 
+//     D extends { [Key in keyof D]: TypeGuard<any> } ? { [Key in keyof D]: D[Key] extends TypeGuard<infer V> ? V : never }
+//     : never;
+
+// export function isImplementationOf<
+//     T extends object = never,
+//     D extends { [key in string | symbol | number]: TypeGuard<any> } = { [key in string | symbol | number]: TypeGuard<any> },
+// >(
+//     map: D
+// ): (value: any) => value is InterfaceFromDescriptor<D> {
+//     const fields = (Object.keys(map) as (keyof D)[]).map(key => ({ key, guard: map[key] }));
+//     return (value: any): value is InterfaceFromDescriptor<typeof map> => 
+//         isNonPrimitive(value)
+//         && fields.every(field => field.guard((value as any)[field.key]));
+// }
